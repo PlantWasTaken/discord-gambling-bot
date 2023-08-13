@@ -30,8 +30,10 @@ def banking(id,result,v): #result is True for win, False for loss
         json.dump(data, jsonFile,indent=4)
 
 def get_bal(id):
-    f = open('banking.json','r')
-    data = json.load(f)
+    round_all()
+
+    with open("banking.json", "r") as jsonFile:
+        data = json.load(jsonFile)
 
     return data[id]['bank']
 
@@ -53,8 +55,8 @@ def add_user(id):
         json.dump(data, jsonFile,indent=4)
 
 def check_user(id,v):
-    f = open('banking.json','r+')
-    data = json.load(f)
+    with open("banking.json", "r") as jsonFile:
+        data = json.load(jsonFile)
 
     try: #checks to see if user is in system
         data[id]
