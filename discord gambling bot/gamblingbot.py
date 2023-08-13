@@ -18,7 +18,7 @@ async def test(ctx):
     val = ctx.message.content.split()[1:]
 
     recipient_id = str(val[0][2:len(val[0])-1])
-    val = int(val[1])
+    val = float(val[1])
 
     result = send(str(id),str(recipient_id),val)
 
@@ -29,7 +29,7 @@ async def test(ctx):
     id = ctx.message.author.id
     val = ctx.message.content.split()[1:][0]
 
-    result = coin(str(id),int(val))
+    result = coin(str(id),float(val))
 
     await ctx.send(result)
 
@@ -40,7 +40,7 @@ async def test(ctx):
     try:
         val = ctx.message.content.split()[1:][0] #fetched id of user pinged
         if(len(val) != 0):
-            id = str(int(val[2:len(val)-1]))
+            id = str(float(val[2:len(val)-1]))
     except:
         pass
 
@@ -53,7 +53,7 @@ async def test(ctx):
     id = ctx.message.author.id
     val = ctx.message.content.split()[1:][0]
 
-    result = dice(str(id),int(val))
+    result = dice(str(id),float(val))
 
     await ctx.send(result)
 
@@ -97,7 +97,7 @@ async def test(ctx):
     try:
         val = ctx.message.content.split()[1:][0] #fetched id of user pinged
         if(len(val) != 0):
-            id = str(int(val[2:len(val)-1]))
+            id = str(float(val[2:len(val)-1]))
     except:
         pass
 
