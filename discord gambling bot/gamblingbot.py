@@ -40,7 +40,7 @@ async def test(ctx):
     try:
         val = ctx.message.content.split()[1:][0] #fetched id of user pinged
         if(len(val) != 0):
-            id = str(float(val[2:len(val)-1]))
+            id = str(val[2:len(val)-1])
     except:
         pass
 
@@ -97,7 +97,7 @@ async def test(ctx):
     try:
         val = ctx.message.content.split()[1:][0] #fetched id of user pinged
         if(len(val) != 0):
-            id = str(float(val[2:len(val)-1]))
+            id = str(val[2:len(val)-1])
     except:
         pass
 
