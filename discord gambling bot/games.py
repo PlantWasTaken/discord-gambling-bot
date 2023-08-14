@@ -243,11 +243,11 @@ def baccarat(id,v,bet): #bet int 0-2 0=bank, 1=player, 2=tie
     #closes to 9 wins, eg 19 = 9, 15 = 5, 10=0
     #payouts are 1/1
     deck_obj = deck_of_cards.DeckOfCards()
-    bank_hand =   [0] #card values
-    player_hand = [0] #zero value in case of null draw
+    bank_hand =   [] #card values
+    player_hand = [] #zero value in case of null draw
 
-    bank_hand_suits =   ['void'] #card suits
-    player_hand_suits = ['void'] #void value in case of null draw
+    bank_hand_suits =   [] #card suits
+    player_hand_suits = [] #void value in case of null draw
 
     for _ in range(2):
         card = deck_obj.give_random_card() #draw the firs tcard
@@ -255,15 +255,19 @@ def baccarat(id,v,bet): #bet int 0-2 0=bank, 1=player, 2=tie
             pass
         else:
             bank_hand.append(card.value)
-            bank_hand_suits.append[card_suits[str(card.suit)]]
+            bank_hand_suits.append(card_suits[str(card.suit)])
 
         card = deck_obj.give_random_card() #draw a new card
         if(card.value > 9):
             pass
         else:
             player_hand.append(card.value)
-            player_hand_suits.append[card_suits[str(card.suit)]]
+            player_hand_suits.append(card_suits[str(card.suit)])
 
+    bank_hand.append(0) #append 0 for null values
+    player_hand.append(0)
+    bank_hand_suits.append('void') #append void for null values
+    player_hand_suits.append('void')
 
     sum_bank = sum(bank_hand)
     sum_player = sum(player_hand)
