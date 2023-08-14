@@ -63,14 +63,17 @@ def check_user(id,v):
     except KeyError: #if not add the user
         add_user(id)
 
-    if(get_bal(id) <= v): #checks if user has balance
-        return False
+    if(get_bal(id) < v): #checks if user has balance
+        return False #bet is
     else:
         return True
     
 def coin(id,v):
     round_all() #rounds all prices before showing ot user
     
+    if(v <= 0): #checks for 0 bets or less tha nzero bets
+        return "<@" + str(id)+ ">" + " you cannot bet " + str(v)
+        
     #addds new user, if id not present also checks bet size
     if(check_user(id, v) == True): 
         pass #(user has been made) bet has been verified
@@ -94,6 +97,9 @@ def coin(id,v):
 def dice(id,v):
     round_all() #rounds all prices before showing ot user
 
+    if(v <= 0): #checks for 0 bets or less tha nzero bets
+        return "<@" + str(id)+ ">" + " you cannot bet " + str(v)
+    
     if(check_user(id, v) == True): 
         pass #(user has been made) bet has been verified
     else:
@@ -261,6 +267,8 @@ def sell_eq(id,ticker,v):
     return msg
 
 def get_portfolio(id):
+    round_all() #apply rounding to portfolio command
+
     with open("banking.json", "r") as jsonFile:
         data = json.load(jsonFile)
 
