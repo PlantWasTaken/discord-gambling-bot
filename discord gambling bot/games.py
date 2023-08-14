@@ -1,8 +1,10 @@
 import random
 import json
 import yfinance as yf
+from deck_of_cards import deck_of_cards
 
 text_to_emote = {
+        "0" : ":zero:",
         "1" : ":one:",
         "2" : ":two:",
         "3" : ":three:",
@@ -11,10 +13,20 @@ text_to_emote = {
         "6" : ":six:",
         "7" : ":seven:",
         "8" : ":eight:",
-        "9" : ":nine:"
+        "9" : ":nine:",
+        "10" : ":one::zero:",
+        "11" : ":one::one:",
+        "12" : ":one::two:",
+        "13" : ":one::three:",
     }
 
-
+card_suits = {
+    "0" : ":spades:",
+    "1" : ":hearts:",
+    "2" : ":diamonds:",
+    "3" : ":clubs:"
+}
+#UTILITY FUNCTIONS
 def banking(id,result,v): #result is True for win, False for loss
     with open("banking.json", "r") as jsonFile:
         data = json.load(jsonFile)
@@ -67,7 +79,72 @@ def check_user(id,v):
         return False #bet is
     else:
         return True
+
+def send_money(id,recipient_id,v):
+    round_all() #rounds all prices before showing ot user
+
+    if(v < 0):
+        return "<@"+str(id)+">" + " You cant send a negative amount."
     
+    if(check_user(id, v) == True): 
+        pass #(user has been made) bet has been verified
+    else:
+        msg = "Not enough funds\n <@" + str(id)+ ">" + "your balance is: " + str(get_bal(id))
+        return msg
+    
+    check_user(recipient_id,0)
+
+
+    with open("banking.json", "r") as jsonFile:
+        data = json.load(jsonFile)
+
+
+    data[id]['bank'] = data[id]['bank']-v                 #remove from sender
+    data[recipient_id]['bank'] = data[recipient_id]['bank']+v #add to recipient
+
+
+    with open("banking.json", "w") as jsonFile:
+        json.dump(data, jsonFile,indent=4)
+
+
+    msg = "You sent: " + str(v) + " to: " + "<@"+str(recipient_id)+">"
+    return msg
+
+def price(id,ticker):
+    try: #look up ticker
+        yfticker = yf.Ticker(ticker)  #ticker exists
+        price = yfticker.info
+        msg = "<@"+str(id)+">"+" The asking price for " + ticker + " is: " + str(price['ask'])
+        return msg
+    except:
+        return "<@"+str(id)+">" + " Ticker does not exist"
+    
+def add_funds(id,v): #take money from bank and add to user
+    if(v < 0):
+        return "<@"+str(id)+">" + " You cant set a negative amount."
+    
+    banking(id,True,v) #adding funds
+    round_all()
+    return f'{"<@"+str(id)+">"} {v} Added to your account'
+
+def round_all():
+    with open("banking.json", "r") as jsonFile:
+        data = json.load(jsonFile)
+    
+    user_ids = []
+    for i in data:
+        user_ids.append(str(i))
+    user_ids.pop(0) #removes bank
+
+    for i in user_ids:
+        data[i]['bank'] = round(data[i]['bank'], 2)
+    
+    data['bank'] = round(data['bank'],2) #adding rounding to bank
+
+    with open("banking.json", "w") as jsonFile: #send changes
+        json.dump(data, jsonFile,indent=4)
+        
+#CASINO TYPE GAMES
 def coin(id,v):
     round_all() #rounds all prices before showing ot user
     
@@ -143,11 +220,18 @@ def dice(id,v):
 
 
     return msg
+        
+def baccarat(id,v,bet): #bet int 0-2 0=bank, 1=player, 2=tie
+    bet_to_str = { #
+        "0": "bank",
+        "1" : "player",
+        "2" : "tie"
+    }
 
-def send(id,recipient_id,v):
     round_all() #rounds all prices before showing ot user
-    if(v < 0):
-        return "<@"+str(id)+">" + " You cant send a negative amount."
+
+    if(v <= 0): #checks for 0 bets or less tha nzero bets
+        return "<@" + str(id)+ ">" + " you cannot bet " + str(v)
     
     if(check_user(id, v) == True): 
         pass #(user has been made) bet has been verified
@@ -155,30 +239,90 @@ def send(id,recipient_id,v):
         msg = "Not enough funds\n <@" + str(id)+ ">" + "your balance is: " + str(get_bal(id))
         return msg
     
-    check_user(recipient_id,0)
+    #bet - bank - user - tie
+    #closes to 9 wins, eg 19 = 9, 15 = 5, 10=0
+    #payouts are 1/1
+    deck_obj = deck_of_cards.DeckOfCards()
+    bank_hand =   [0] #card values
+    player_hand = [0] #zero value in case of null draw
 
-    with open("banking.json", "r") as jsonFile:
-        data = json.load(jsonFile)
+    bank_hand_suits =   ['void'] #card suits
+    player_hand_suits = ['void'] #void value in case of null draw
 
-    data[id]['bank'] = data[id]['bank']-v                 #remove from sender
-    data[recipient_id]['bank'] = data[recipient_id]['bank']+v #add to recipient
+    for _ in range(2):
+        card = deck_obj.give_random_card() #draw the firs tcard
+        if(card.value > 9):
+            pass
+        else:
+            bank_hand.append(card.value)
+            bank_hand_suits.append[card_suits[str(card.suit)]]
 
+        card = deck_obj.give_random_card() #draw a new card
+        if(card.value > 9):
+            pass
+        else:
+            player_hand.append(card.value)
+            player_hand_suits.append[card_suits[str(card.suit)]]
+
+
+    sum_bank = sum(bank_hand)
+    sum_player = sum(player_hand)
+
+    #baccarat hand values
+    true_sum_bank = 0
+    true_sum_player = 0
+
+    if(sum_bank > 9):
+        true_sum_bank = int(str(sum_bank)[1])
+    else:
+        true_sum_bank = sum_bank
     
-    with open("banking.json", "w") as jsonFile:
-        json.dump(data, jsonFile,indent=4)
+    if(sum_player > 9):
+        true_sum_player = int(str(sum_player)[1])
+    else:
+        true_sum_player = sum_player
 
-    msg = "You sent: " + str(v) + " to: " + "<@"+str(recipient_id)+">"
+    #deicind the winner
+    win = 0 #0 = bank, 1 = player, 2=tie
+    if(true_sum_player==true_sum_bank):
+        win = 2
+    elif(true_sum_bank>true_sum_player):
+        win = 0
+    else:
+        win = 1
+
+    #comparing winner to user bet
+    result = None
+    if(win == bet and win == 2): #if no bet on tie, result = trie. push --check for tie
+        result = "push" #tie occurs
+        #no money is moved
+
+    elif(win == bet and bet == 2):
+        result = "win"
+        banking(id,True,v) #win
+
+    elif(win == bet):
+        result = "win"
+        banking(id,True,v) #win
+
+    else:
+        result = "loss"
+        banking(id,False,v) #loss
+
+    #return format 
+    #Dealer: 4:hearts:8:clubs: Value: 2
+    #Player: 2:diamonds:6:clubs: Value: 8 if any card is greather than 10 no card will be showed
+    #User bet: bank/player/tie outcome bank/player/tie
+    #Result: @user won/lost/push value
+
+    msg = "Dealer: " + text_to_emote[str(bank_hand[0])]+str(bank_hand_suits[0])+ text_to_emote[str(bank_hand[1])]+str(bank_hand_suits[1]) + " Value: "+ str(true_sum_bank)+"\n"
+    msg = msg + "Player: " + text_to_emote[str(player_hand[0])]+str(player_hand_suits[0])+ text_to_emote[str(player_hand[1])]+str(player_hand_suits[1])+ " Value: "+ str(true_sum_player)+"\n"
+    msg = msg + "User bet: " + bet_to_str[str(bet)]+" - Outcome: "+ bet_to_str[str(win)]+"\n"
+    msg = msg + "<@" + str(id)+ ">" + " " + result + " " + str(v)
     return msg
 
-def price(id,ticker):
-    try: #look up ticker
-        yfticker = yf.Ticker(ticker)  #ticker exists
-        price = yfticker.info
-        msg = "<@"+str(id)+">"+" The asking price for " + ticker + " is: " + str(price['ask'])
-        return msg
-    except:
-        return "<@"+str(id)+">" + " Ticker does not exist"
-        
+
+#STOCK COMMANDS
 def buy_eq(id,ticker,v):
     if(v <= 0):
         return "<@"+str(id)+">" +" Buy more than 0 shares"
@@ -299,22 +443,9 @@ def get_portfolio(id):
 
     return msg
 
-def round_all():
-    with open("banking.json", "r") as jsonFile:
-        data = json.load(jsonFile)
-    
-    user_ids = []
-    for i in data:
-        user_ids.append(str(i))
-    user_ids.pop(0) #removes bank
-
-    for i in user_ids:
-        data[i]['bank'] = round(data[i]['bank'], 2)
-    
-    with open("banking.json", "w") as jsonFile: #send changes
-        json.dump(data, jsonFile,indent=4)
 #coin("751324191923503105", 100)
 #dice("751324191923503105", 100)
 #print(buy_eq("972980724951040051", "TSLA", 9))
 #get_portfolio("972980724951040051")
 #round_all()
+#baccarat("972980724951040051",1,0)
