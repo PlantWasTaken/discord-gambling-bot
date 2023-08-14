@@ -1,108 +1,134 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 import yfinance as yf
-from games import coin, get_bal, dice, send, price,buy_eq,sell_eq,get_portfolio
+from games import coin, get_bal, dice, send_money, price,buy_eq,sell_eq,get_portfolio,add_funds,baccarat
 
-token = ''
+token = 'MTE0MDQwNDIwNTkxMjMzNDQ4OQ.GmpE-L.-fA6x7TVFCcwYhVHRwfMIj3_1Mj6Oz_alTfPBk'
 
 client = discord.Client(intents = discord.Intents.all())
 
-channel = 1069711820698419322
-
 bot = commands.Bot(command_prefix='$',intents = discord.Intents.all())
 
+@bot.event
+async def on_ready():
+    print("Bot is ready")
+    try:
+        synced = await bot.tree.sync()
+        print(len(synced))
+    except Exception as e:
+        print(e)
 
-@bot.command(name = "send")
-async def test(ctx):
-    id = ctx.message.author.id
-    val = ctx.message.content.split()[1:]
+@bot.tree.command(name = "sendmoney")
+@app_commands.describe(name = "Reciver of moneys")
+@app_commands.describe(val = "Amount of moneys")
+async def send(interaction: discord.Interaction, name:str, val:float):
 
-    recipient_id = str(val[0][2:len(val[0])-1])
-    val = float(val[1])
+    sender_id = interaction.user.id
 
-    result = send(str(id),str(recipient_id),val)
+    recipient_id =str(name[2:len(name)-1])
 
-    await ctx.send(result)
+    result = send_money(str(sender_id),recipient_id,val)
 
-@bot.command(name = "coin")
-async def test(ctx):
-    id = ctx.message.author.id
-    val = ctx.message.content.split()[1:][0]
+    await interaction.response.send_message(result)
 
-    result = coin(str(id),float(val))
 
-    await ctx.send(result)
+@bot.tree.command(name = "coin")
+@app_commands.describe(val = "Bet")
+async def play_coin(interaction: discord.Interaction, val:float):
+    sender_id = interaction.user.id
 
-@bot.command(name = "bal")
-async def test(ctx):
-    id = ctx.message.author.id
+    result = coin(str(sender_id),val)
+
+    await interaction.response.send_message(result)
+
+
+@bot.tree.command(name = "bal")
+@app_commands.describe(user = "balance of user")
+async def bal(interaction: discord.Interaction, user: str=None):
+    if(user == None):
+        discord_id = interaction.user.id
+    else:
+        discord_id = str(user[2:len(user)-1])
+    
+    bal = get_bal(str(discord_id))
+
+    await interaction.response.send_message(f'{"<@"+str(discord_id)+">"} your balance is: {bal}')
+
+
+@bot.tree.command(name = "dice")
+@app_commands.describe(val = "Bet")
+async def play_dice(interaction: discord.Interaction, val:float):
+    sender_id = interaction.user.id
+
+    result = dice(str(sender_id),val)
+
+    await interaction.response.send_message(result)
+
+
+@bot.tree.command(name = "stockprice")
+@app_commands.describe(ticker = "stock ticker")
+async def get_ticker_price(interaction: discord.Interaction, ticker:str):
+    sender_id = interaction.user.id
 
     try:
-        val = ctx.message.content.split()[1:][0] #fetched id of user pinged
-        if(len(val) != 0):
-            id = str(val[2:len(val)-1])
-    except:
-        pass
+        result = price(str(sender_id),ticker)
+        await interaction.response.send_message(result)
+    except Exception as e:
+        await interaction.response.send_message(f'{"<@"+str(id)+">"} Please provide a ticker.')
 
-    bal = get_bal(str(id))
 
-    await ctx.send("<@"+str(id)+"> Your balance is: " + str(bal))
+@bot.tree.command(name = "buyshares")
+@app_commands.describe(ticker = "Ticker (all capital letters)")
+@app_commands.describe(amount = "How many shares")
+async def user_buy_eq(interaction: discord.Interaction, ticker:str,amount:int):
+    sender_id = interaction.user.id
+    result = buy_eq(str(sender_id),ticker,amount)
+    await interaction.response.send_message(result)
 
-@bot.command(name = "dice")
-async def test(ctx):
-    id = ctx.message.author.id
-    val = ctx.message.content.split()[1:][0]
+@bot.tree.command(name = "sellshares")
+@app_commands.describe(ticker = "Ticker (all capital letters)")
+@app_commands.describe(amount = "How many shares")
+async def user_sell_eq(interaction: discord.Interaction, ticker:str,amount:int):
+    sender_id = interaction.user.id
+    result = sell_eq(str(sender_id),ticker,amount)
+    await interaction.response.send_message(result)
 
-    result = dice(str(id),float(val))
+@bot.tree.command(name = "portfolio")
+@app_commands.describe(user = "Portfolio of user")
+async def bal(interaction: discord.Interaction, user: str=None):
+    if(user == None):
+        discord_id = interaction.user.id
+    else:
+        discord_id = str(user[2:len(user)-1])
+    
+    portf = get_portfolio(str(discord_id))
+    await interaction.response.send_message(portf)
 
-    await ctx.send(result)
+@bot.tree.command(name = "addfunds")
+@app_commands.describe(amount = "How much to add to account")
+async def user_add_funds(interaction: discord.Interaction,amount:float):
 
-@bot.command(name = "price")
-async def test(ctx):
-    id = ctx.message.author.id
-    ticker = ctx.message.content.split()[1:][0]
-    try:
-        result = price(str(id),str(ticker))
+    sender_id = interaction.user.id
+    result = add_funds(str(sender_id),amount)
 
-        await ctx.send(result)
-    except:
-        await ctx.send("<@"+str(id)+"> Please provide a ticker.")
+    await interaction.response.send_message(result)
 
-@bot.command(name = "buy")
-async def test(ctx):
-    id = ctx.message.author.id
-    msg = ctx.message.content.split()[1:]
 
-    ticker = msg[0]
-    amount = int(msg[1])
+@bot.tree.command(name = "baccarat")
+@app_commands.describe(val = "bet")
+@app_commands.describe(bet = "Who do you want to bet on")
+@app_commands.choices(bet=[
+    app_commands.Choice(name='bank', value=0),
+    app_commands.Choice(name='player', value=1),
+    app_commands.Choice(name='tie', value=2)
+])
+async def play_baccarat(interaction: discord.Interaction, val: float, bet: app_commands.Choice[int]):
+    sender_id = interaction.user.id
+    #print(val,bet.value)
+    result = baccarat(str(sender_id),val,bet.value)
+    await interaction.response.send_message(result)
 
-    result = buy_eq(str(id),ticker,amount)
-    await ctx.send(result)
-
-@bot.command(name = "sell")
-async def test(ctx):
-    id = ctx.message.author.id
-    msg = ctx.message.content.split()[1:]
-
-    ticker = msg[0]
-    amount = int(msg[1])
-
-    result = sell_eq(str(id),ticker,amount)
-    await ctx.send(result)
-
-@bot.command(name = "portfolio")
-async def test(ctx):
-    id = ctx.message.author.id
-
-    try:
-        val = ctx.message.content.split()[1:][0] #fetched id of user pinged
-        if(len(val) != 0):
-            id = str(val[2:len(val)-1])
-    except:
-        pass
-
-    portf = get_portfolio(str(id))
-    await ctx.send(portf)
 
 if __name__ == "__main__":
     bot.run(token)
