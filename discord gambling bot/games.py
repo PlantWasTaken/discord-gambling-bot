@@ -299,6 +299,7 @@ def baccarat(id,v,bet): #bet int 0-2 0=bank, 1=player, 2=tie
     result = None
     if(win == bet and win == 2): #if no bet on tie, result = trie. push --check for tie
         result = "push" #tie occurs
+        return f'Game push no money won or lost'
         #no money is moved
 
     elif(win == bet and bet == 2):
