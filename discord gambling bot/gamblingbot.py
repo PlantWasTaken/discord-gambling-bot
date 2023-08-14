@@ -4,7 +4,7 @@ from discord.ext import commands
 import yfinance as yf
 from games import coin, get_bal, dice, send_money, price,buy_eq,sell_eq,get_portfolio,add_funds,baccarat
 
-token = 'MTE0MDQwNDIwNTkxMjMzNDQ4OQ.GmpE-L.-fA6x7TVFCcwYhVHRwfMIj3_1Mj6Oz_alTfPBk'
+token = ''
 
 client = discord.Client(intents = discord.Intents.all())
 
