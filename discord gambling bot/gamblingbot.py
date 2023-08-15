@@ -72,7 +72,7 @@ async def get_ticker_price(interaction: discord.Interaction, ticker:str):
     sender_id = interaction.user.id
 
     try:
-        result = price(str(sender_id),ticker)
+        result = price(str(sender_id),ticker.upper())
         await interaction.response.send_message(result)
     except Exception as e:
         await interaction.response.send_message(f'{"<@"+str(id)+">"} Please provide a ticker.')
@@ -83,7 +83,7 @@ async def get_ticker_price(interaction: discord.Interaction, ticker:str):
 @app_commands.describe(amount = "How many shares")
 async def user_buy_eq(interaction: discord.Interaction, ticker:str,amount:int):
     sender_id = interaction.user.id
-    result = buy_eq(str(sender_id),ticker,amount)
+    result = buy_eq(str(sender_id),ticker.upper(),amount)
     await interaction.response.send_message(result)
 
 @bot.tree.command(name = "sellshares")
@@ -91,7 +91,7 @@ async def user_buy_eq(interaction: discord.Interaction, ticker:str,amount:int):
 @app_commands.describe(amount = "How many shares")
 async def user_sell_eq(interaction: discord.Interaction, ticker:str,amount:int):
     sender_id = interaction.user.id
-    result = sell_eq(str(sender_id),ticker,amount)
+    result = sell_eq(str(sender_id),ticker.upper(),amount)
     await interaction.response.send_message(result)
 
 @bot.tree.command(name = "portfolio")
