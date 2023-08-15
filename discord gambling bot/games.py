@@ -281,7 +281,7 @@ def baccarat(id,v,bet): #bet int 0-2 0=bank, 1=player, 2=tie
         player_hand_suits.append('void') 
     else:
         pass
-    
+
     sum_bank = sum(bank_hand)
     sum_player = sum(player_hand)
 
@@ -339,6 +339,33 @@ def baccarat(id,v,bet): #bet int 0-2 0=bank, 1=player, 2=tie
     msg = msg + "<@" + str(id)+ ">" + " " + result + " " + str(v)
     return msg
 
+def slots(id,v):
+    round_all() #rounds all prices before showing ot user
+
+    if(v <= 0): #checks for 0 bets or less tha nzero bets
+        return "<@" + str(id)+ ">" + " you cannot bet " + str(v)
+    
+    if(check_user(id, v) == True): 
+        pass #(user has been made) bet has been verified
+    else:
+        msg = "Not enough funds\n <@" + str(id)+ ">" + "your balance is: " + str(get_bal(id))
+        return msg
+    
+    slot_machine = [random.randint(0,3) for _ in range(3)] #3symbol slot
+    slot_display = [card_suits[str(i)] for i in slot_machine]
+
+    if(len(set(slot_machine))==1): #if all symbols are equal
+        banking(id,True,v) #win
+        msg = "You Won: " + str(v) + "\n <@" + str(id)+ ">" + "your new balance is: " + str(get_bal(id))
+    else:
+        banking(id,False,v) #loss
+        msg = "You lost: " + str(v) + "\n <@" + str(id)+ ">" + "your new balance is: " + str(get_bal(id))
+
+    #user output
+    #Slot: :hearts::clubs::clubs:
+    #Result: msg
+    output = f'Slot: {"".join(slot_display)} \n {msg}'
+    return output
 
 #STOCK COMMANDS
 def buy_eq(id,ticker,v):
@@ -472,3 +499,4 @@ def get_portfolio(id):
 #get_portfolio("972980724951040051")
 #round_all()
 #baccarat("972980724951040051",1,0)
+#print(slots("972980724951040051",1))
