@@ -269,6 +269,19 @@ def baccarat(id,v,bet): #bet int 0-2 0=bank, 1=player, 2=tie
     bank_hand_suits.append('void') #append void for null values
     player_hand_suits.append('void')
 
+    #fixing no response bug if there are 0 cards in either players hands
+    if(len(bank_hand)==1):
+        bank_hand.append(0)
+        bank_hand_suits.append('void') 
+    else:
+        pass
+
+    if(len(player_hand)==1):
+        player_hand.append(0)
+        player_hand_suits.append('void') 
+    else:
+        pass
+    
     sum_bank = sum(bank_hand)
     sum_player = sum(player_hand)
 
@@ -341,6 +354,8 @@ def buy_eq(id,ticker,v):
         yfticker = yf.Ticker(ticker)  #ticker exists
         yfticker.info
 
+        if(yfticker.info['ask'] == 0):
+            return f'The exchange {ticker} is traded on is not open.'
     except:
         return "<@"+str(id)+">" +" Ticker does not exist"
     
@@ -385,6 +400,9 @@ def sell_eq(id,ticker,v):
     try: #look up ticker
         yfticker = yf.Ticker(ticker)  #ticker exists
         yfticker.info
+
+        if(yfticker.info['ask'] == 0):
+            return f'The exchange {ticker} is traded on is not open.'
 
     except:
         return "<@"+str(id)+">" +" Ticker does not exist"
@@ -431,7 +449,7 @@ def get_portfolio(id):
         amount.append(int(data[id]['stock'][i]))
 
         yfticker = yf.Ticker(i)  #ticker exists
-        ask = float(yfticker.info['ask'])
+        ask = float(yfticker.info['currentPrice'])
         prices.append(float(ask))
 
     round_all() #rounds all prices before showing ot user
