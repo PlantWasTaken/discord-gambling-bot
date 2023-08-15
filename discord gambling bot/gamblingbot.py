@@ -2,9 +2,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import yfinance as yf
-from games import coin, get_bal, dice, send_money, price,buy_eq,sell_eq,get_portfolio,add_funds,baccarat
+from games import coin, get_bal, dice, send_money, price,buy_eq,sell_eq,get_portfolio,add_funds,baccarat,slots
 
-token = ''
+token = 'MTE0MDQwNDIwNTkxMjMzNDQ4OQ.GmpE-L.-fA6x7TVFCcwYhVHRwfMIj3_1Mj6Oz_alTfPBk'
 
 client = discord.Client(intents = discord.Intents.all())
 
@@ -129,6 +129,14 @@ async def play_baccarat(interaction: discord.Interaction, val: float, bet: app_c
     result = baccarat(str(sender_id),val,bet.value)
     await interaction.response.send_message(result)
 
+@bot.tree.command(name = "slots")
+@app_commands.describe(val = "Bet")
+async def play_slots(interaction: discord.Interaction, val:float):
+    sender_id = interaction.user.id
+
+    result = slots(str(sender_id),val)
+
+    await interaction.response.send_message(result)
 
 if __name__ == "__main__":
     bot.run(token)
